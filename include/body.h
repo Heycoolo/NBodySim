@@ -1,11 +1,8 @@
 #ifndef BODY_H
 #define BODY_H
 
-// This constant is needed for memory allocation inside the struct
-// Fewer dimensions are allowed, then the 3rd coordinate is neglected
-#define MAXIMAL_DIMENSIONS 3
 
-
+//#include "../include/system.h"
 #include <stddef.h>
 
 struct position {
@@ -32,13 +29,17 @@ struct body {
     size_t n_dim;
     size_t n_steps;
     double mass;
-    State *sol_arr;
+    State init_state;
+    State curr_state;
+    State *state_arr;
+    //System *sys;
 };
 typedef struct body Body;
 
 
 void initialize_body_state_array(Body *b);
-
+void store_init_body_state(Body *b);
+void store_current_body_state(Body *b, size_t curr_step);
 
 
 #endif
