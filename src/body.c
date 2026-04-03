@@ -6,7 +6,6 @@
 
 void initialize_body_state_array(Body *b) {
 
-
     State *arr = calloc(b->n_steps, sizeof(State));
     if (arr == NULL) {
         exit(1);

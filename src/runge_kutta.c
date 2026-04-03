@@ -1,36 +1,41 @@
 #include "../include/runge_kutta.h"
 #include "../include/system.h"
+#include <stdlib.h>
+#include <string.h>
 
 
 
-void RK4(System * const sys,
-            void (*eval_func)(State *dest, State *curr_state, System *sys)) {
+static void add_states(State *interim_state, State *curr_state, Change *k,
+                        double factor, size_t total_len);
+
+
+void RK4(System * const sys) {
 
     double step_size = sys->step_size;
 
     State *curr_state = sys->curr_system_state;
     State *interim_state = calloc(sys->n_bodies, sizeof(State));
-    State *k1 = calloc(sys->n_bodies, sizeof(State));
-    State *k2 = calloc(sys->n_bodies, sizeof(State));
-    State *k3 = calloc(sys->n_bodies, sizeof(State));
-    State *k4 = calloc(sys->n_bodies, sizeof(State));
+    Change *k1 = calloc(sys->n_bodies, sizeof(Change));
+    Change *k2 = calloc(sys->n_bodies, sizeof(Change));
+    Change *k3 = calloc(sys->n_bodies, sizeof(Change));
+    Change *k4 = calloc(sys->n_bodies, sizeof(Change));
     State *new_state = calloc(sys->n_bodies, sizeof(State));
 
     // k1 = f( yn )
-    eval_func(k1, curr_state, sys);
+    sys->eval_func(k1, curr_state, sys);
     
 
     // k2 = f( yn + k1 * step_size/2 )
     add_states(interim_state, curr_state, k1, step_size/2, sys->n_statevariables);
-    eval_func(k2, interim_state, sys);
+    sys->eval_func(k2, interim_state, sys);
     
     // k3 = f( yn + k2 * step_size/2 )
     add_states(interim_state, curr_state, k2, step_size/2, sys->n_statevariables);
-    eval_func(k3, interim_state, sys);
+    sys->eval_func(k3, interim_state, sys);
 
     // k4 = f( yn + k3 * step_size )
     add_states(interim_state, curr_state, k3, step_size, sys->n_statevariables);
-    eval_func(k4, interim_state, sys);
+    sys->eval_func(k4, interim_state, sys);
 
     size_t total_len = sys->n_bodies * sizeof(State)/sizeof(double);
     add_states(new_state, curr_state, k1, 0, total_len);
@@ -53,7 +58,7 @@ void RK4(System * const sys,
 }
 
 
-static void add_states(State *interim_state, State *curr_state, State *k,
+static void add_states(State *interim_state, State *curr_state, Change *k,
                         double factor, size_t total_len) {
 
     double *tmp_interim = (double*) interim_state;

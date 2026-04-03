@@ -1,9 +1,11 @@
 #ifndef BODY_H
 #define BODY_H
 
-
-//#include "../include/system.h"
 #include <stddef.h>
+
+// Declaration of system struct (header cannot be included)
+typedef struct system System;
+
 
 struct position {
     double x;
@@ -15,14 +17,29 @@ struct velocity {
     double vy;
     double vz;
 };
+struct acceleration {
+    double ax;
+    double ay;
+    double az;
+};
+
 typedef struct position Position;
 typedef struct velocity Velocity;
+typedef struct acceleration Acceleration;
+
 
 struct state {
     Position pos;
     Velocity vel;
 };
+struct change {
+    Velocity vel;
+    Acceleration acc;
+};
+
 typedef struct state State;
+typedef struct change Change;
+
 
 struct body {
     size_t id;
@@ -31,9 +48,11 @@ struct body {
     double mass;
     State init_state;
     State curr_state;
+    Change curr_change;
     State *state_arr;
-    //System *sys;
+    System *sys;
 };
+
 typedef struct body Body;
 
 

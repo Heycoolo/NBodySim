@@ -6,18 +6,29 @@
 struct system {
     size_t n_bodies;
     size_t n_dim;
+    size_t n_steps;
     double step_size;
-    Body * const bodies;
     size_t n_statevariables;
     State *curr_system_state;
+    State *next_system_state;
+    void (*eval_func)(Change *k, State *state, System *sys);
+    void (*step_func)(System *sys);
+    Body * const bodies;
 };
 typedef struct system System;
 
 void initialize_system_state(System *sys);
 void set_initial_system_state(System *sys);
-void set_current_system_state(System *sys); // I think this is not really needed?!
-void calculate_next_system_state(System *sys, State *(*step_func)(System *sys));
+
+void calculate_next_system_state(System *sys);
 void update_body_states(System *sys);
+void store_body_states(System *sys, size_t curr_step);
+
+void evaluate_force_law(Change *k, State *state, System *sys);
+
+// Debugging functions
 void print_system_state(System *sys);
+void print_body_states(System *sys);
+void print_state_array(System *sys, size_t sampl);
 
 #endif
