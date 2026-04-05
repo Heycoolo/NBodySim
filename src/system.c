@@ -93,46 +93,56 @@ void evaluate_force_law(Change *k, State *state, System *sys) {
     zero_change_of_state(sys);
 
     double distance;
-    Body *tmp_body1;
-    Body *tmp_body2;
     double tmp_ax;
     double tmp_ay;
     double tmp_az;
+    
+    Body *tmp_body1 = sys->bodies;
+    Body *tmp_body2;
+
+    State *state_1 = state;
+    State *state_2 = state;
+    
     for (size_t i = 0; i < sys->n_bodies; i++) {
-        tmp_body1 = sys->bodies + i;
-        
         // Assign current velocities to the state change
-        tmp_body1->curr_change.vel.vx = tmp_body1->curr_state.vel.vx;
-        tmp_body1->curr_change.vel.vy = tmp_body1->curr_state.vel.vy;
-        tmp_body1->curr_change.vel.vz = tmp_body1->curr_state.vel.vz;
+        tmp_body1->curr_change.vel.vx = state_1->vel.vx;
+        tmp_body1->curr_change.vel.vy = state_1->vel.vy;
+        tmp_body1->curr_change.vel.vz = state_1->vel.vz;
 
         for (size_t j = 0; j < sys->n_bodies; j++) {
             if (i == j) {
                 continue;
             }
+            state_2 = state + j;
             tmp_body2 = sys->bodies + j;
-            distance = calculate_distance(&tmp_body1->curr_state.pos,
-                                          &tmp_body2->curr_state.pos);
+            distance = calculate_distance(&state_1->pos, &state_2->pos);
             if (fabs(distance) <= NUMERICAL_THRESHHOLD_D) {
                 continue;
             }
+            
             tmp_ax = GRAVIT * tmp_body2->mass /(pow(distance, 3))
-                    * (tmp_body2->curr_state.pos.x - tmp_body1->curr_state.pos.x);
+                    * (state_2->pos.x - state_1->pos.x);
             tmp_ay = GRAVIT * tmp_body2->mass /(pow(distance, 3))
-                    * (tmp_body2->curr_state.pos.y - tmp_body1->curr_state.pos.y);
+                    * (state_2->pos.y - state_1->pos.y);
             tmp_az = GRAVIT * tmp_body2->mass /(pow(distance, 3))
-                    * (tmp_body2->curr_state.pos.z - tmp_body1->curr_state.pos.z);
+                    * (state_2->pos.z - state_1->pos.z);
+            
             // Add to new state of body i
             tmp_body1->curr_change.acc.ax += tmp_ax;
             tmp_body1->curr_change.acc.ay += tmp_ay;
             tmp_body1->curr_change.acc.az += tmp_az;
         }
-    }
 
-    for (size_t i = 0; i < sys->n_bodies; i++) {
-        void *tmp = memcpy(k + i, &(sys->bodies + i)->curr_change, sizeof(Change));
-    }
+        void *tmp = memcpy(k + i,
+                            &tmp_body1->curr_change,
+                            sizeof(Change));
+        if (tmp == NULL) {
+            exit(1);
+        }
 
+        tmp_body1++;
+        state_1++;
+    }
     return;
 }
 
@@ -188,7 +198,6 @@ void print_system_state(System *sys) {
 void print_body_states(System *sys) {
 
     printf("\nCurrent system changes are defined by force law\n");
-    State *tmp_state;
     Change *tmp_change;
     Body *b;
     for (size_t i = 0; i < sys->n_bodies; i++) {

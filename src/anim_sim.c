@@ -3,6 +3,7 @@
 #include "../include/body.h"
 #include <raylib.h>
 #include <stdio.h>
+#include <math.h>
 
 
 
@@ -23,15 +24,12 @@ void animate_simulation(System *sys) {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    Body *body1 = sys->bodies;
-    State *state1 = body1->state_arr;
-    Body *body2 = sys->bodies + 1;
-    State *state2 = body2->state_arr;
-    Body *body3 = sys->bodies + 2;
-    State *state3 = body3->state_arr;
+    State *state;
 
-    int pos1_x, pos2_x, pos3_x;
-    int pos1_y, pos2_y, pos3_y;
+    int pos_x, pos_y;
+
+    float radius;
+    float radius_scale = 1;
 
     int scl = 50;
 
@@ -41,38 +39,28 @@ void animate_simulation(System *sys) {
     int step_per_frame = steps_per_anim_second/FPS * time_scl;
 
     char buf[32];
-    size_t i = 0;
+    size_t j = 0;
     while (!WindowShouldClose()) {
-        // Update body position
-        pos1_x = (int) (scl * state1->pos.x);
-        pos1_y = (int) (scl * state1->pos.y);
-        pos2_x = (int) (scl * state2->pos.x);
-        pos2_y = (int) (scl * state2->pos.y);
-        pos3_x = (int) (scl * state3->pos.x);
-        pos3_y = (int) (scl * state3->pos.y);
+        snprintf(buf, 32, "%lu", j);
 
-
-        snprintf(buf, 32, "%lu", i);
         BeginDrawing();
         ClearBackground((Color){0,0,0,0});
         BeginMode2D(camera);
-        DrawCircle(pos1_x, pos1_y, 10, (Color){255,255,255,255});
-        DrawCircle(pos2_x, pos2_y, 10, (Color){255,255,100,255});
-        DrawCircle(pos3_x, pos3_y, 10, (Color){255,100,255,255});
-        //DrawCircle(100, 100, 10, (Color){255,255,255,255});
+
+        for (size_t i = 0; i < sys->n_bodies; i++) {
+            radius = radius_scale * 
+                        pow(3 / (4*PI) * (sys->bodies + i)->mass, 1.0/3.0); 
+            state = (sys->bodies + i)->state_arr + j;
+            pos_x = (int) scl * state->pos.x;
+            pos_y = (int) scl * state->pos.y;
+            DrawCircle(pos_x, pos_y, radius, (Color){255,255,255,255});
+        }
         DrawText(buf, -500, -500, 20, (Color){255,255,255,255});
 
-
         EndDrawing();
-        i += step_per_frame;
-        state1 += step_per_frame;
-        state2 += step_per_frame;
-        state3 += step_per_frame;
-        if (i >= sys->n_steps) {
-            i = 0;
-            state1 = body1->state_arr;
-            state2 = body2->state_arr;
-            state3 = body3->state_arr;
+        j += step_per_frame;
+        if (j >= sys->n_steps) {
+            j = 0;
         }
     }
 

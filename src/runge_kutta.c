@@ -70,11 +70,3 @@ static void add_states(State *interim_state, State *curr_state, Change *k,
 
     return;
 }
-
-static void multiply_scalar(double factor, State *state, size_t arr_len) {
-    double *tmp = (double*) state;
-    for (size_t i = 0; i < arr_len; i++) {
-        *(tmp + i) *= factor;
-    }
-    return;
-}

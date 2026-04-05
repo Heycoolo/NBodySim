@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -g -O0
+CFLAGS = -Wall -Wextra -Wpedantic -g -O1
 LDFLAGS = -lm -lraylib
 
 

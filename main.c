@@ -14,18 +14,18 @@ int main() {
     size_t n_body = 3;
     size_t states_per_body = 2 * 3; //3 pos + 3 vel
     size_t n_dim = 2;
-    double init_x[] = {0, 3, 0};
-    double init_y[] = {0, 0, 3};
+    double init_x[] = {0, 3, -6};
+    double init_y[] = {0, 0, 0};
     double init_z[] = {0, 0, 0};
-    double init_vx[] = {0, 0, -5};
-    double init_vy[] = {0, 5, -1};
+    double init_vx[] = {0, 0, 0};
+    double init_vy[] = {0, 10, -5};
     double init_vz[] = {0, 0, 0};
-    double masses[] = {4e4, 1e2, 1e2};
+    double masses[] = {4e4, 1e3, 1e3};
 
     // Time interval
     double t_0 = 0;
-    double t_end = 10;
-    double step_size = 1e-6;
+    double t_end = 100;
+    double step_size = 1e-5;
     size_t n_steps = (t_end - t_0)/step_size;
 
     // Allocate space for body structs
@@ -48,7 +48,7 @@ int main() {
     // Initialize all bodies
     Position tmp_pos;
     Velocity tmp_vel;
-    Body tmp_body;
+    //Body tmp_body;
     for (size_t i = 0; i < n_body; i++) {
         tmp_pos = (Position){
             .x = init_x[i],
@@ -69,12 +69,6 @@ int main() {
         };
         initialize_body_state_array(bodies + i);
         store_init_body_state(bodies + i);
-        tmp_body = *(bodies + i);
-        printf("x: %lf, y: %lf, vx: %lf, vy: %lf\n",
-                                                tmp_body.state_arr->pos.x,
-                                                tmp_body.state_arr->pos.y,
-                                                tmp_body.state_arr->vel.vx,
-                                                tmp_body.state_arr->vel.vy);
     }
     initialize_system_state(&sys);
     set_initial_system_state(&sys);
