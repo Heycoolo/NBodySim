@@ -14,18 +14,31 @@ int main() {
     size_t n_body = 3;
     size_t states_per_body = 2 * 3; //3 pos + 3 vel
     size_t n_dim = 2;
-    double init_x[] = {0, 3, -6};
-    double init_y[] = {0, 0, 0};
+
+
+    // Figure eight -- Periodic solution
+    double dist_scale = 4;
+    double init_x[] = {dist_scale*0.97000436, dist_scale*-0.97000436, 0};
+    double init_y[] = {dist_scale*-0.24308753, dist_scale*0.24308753, 0};
     double init_z[] = {0, 0, 0};
-    double init_vx[] = {0, 0, 0};
-    double init_vy[] = {0, 10, -5};
+    double init_vx[] = {dist_scale*0.466203685012, dist_scale*0.466203685012, dist_scale*-0.932407370024};
+    double init_vy[] = {dist_scale*0.432365730026, dist_scale*0.432365730026, dist_scale*-0.864731460052};
     double init_vz[] = {0, 0, 0};
-    double masses[] = {4e4, 1e3, 1e3};
+    double masses[] = {1e4, 1e4, 1e4};
+
+    //double init_x[] = {0, 3, -6};
+    //double init_y[] = {0, 0, 0};
+    //double init_z[] = {0, 0, 0};
+    //double init_vx[] = {0, 0, 0};
+    //double init_vy[] = {0, 10, -5};
+    //double init_vz[] = {0, 0, 0};
+    //double masses[] = {4e4, 1e3, 1e3};
+
 
     // Time interval
     double t_0 = 0;
-    double t_end = 100;
-    double step_size = 1e-5;
+    double t_end = 20;
+    double step_size = 5e-7;
     size_t n_steps = (t_end - t_0)/step_size;
 
     // Allocate space for body structs
