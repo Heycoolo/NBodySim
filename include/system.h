@@ -5,7 +5,6 @@
 
 struct system {
     size_t n_bodies;
-    size_t n_dim;
     size_t n_steps;
     double step_size;
     size_t n_statevariables;
@@ -13,7 +12,7 @@ struct system {
     State *next_system_state;
     void (*eval_func)(Change *k, State *state, System *sys);
     void (*step_func)(System *sys);
-    Body * const bodies;
+    Body * bodies;
 };
 typedef struct system System;
 

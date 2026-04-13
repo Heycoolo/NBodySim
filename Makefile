@@ -1,15 +1,15 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -g -O1
-LDFLAGS = -lm -lraylib
+CFLAGS = -Wall -Wextra -Wpedantic -g -O0
+LDFLAGS = -lm -lraylib -lcjson
 
 
 
 all: main
 
-main: main.o ./src/body.o ./src/system.o ./src/runge_kutta.o ./src/anim_sim.o
-	gcc $(CFLAGS) main.c ./src/body.c ./src/system.c ./src/runge_kutta.c ./src/anim_sim.c -o main $(LDFLAGS)
+main: main.o ./src/body.o ./src/system.o ./src/runge_kutta.o ./src/anim_sim.o ./src/parse_input.o
+	gcc $(CFLAGS) main.c ./src/body.c ./src/system.c ./src/runge_kutta.c ./src/anim_sim.c ./src/parse_input.c -o main $(LDFLAGS)
 
 
 
 clean:
-	rm main.o ./src/body.o ./src/system.o ./src/runge_kutta.o ./src/anim_sim.o
+	rm main.o ./src/body.o ./src/system.o ./src/runge_kutta.o ./src/anim_sim.o ./src/parse_input.o
