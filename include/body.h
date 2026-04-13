@@ -3,38 +3,22 @@
 
 #include <stddef.h>
 
+#define N_DIM 3
+
 // Declaration of system struct (header cannot be included)
 typedef struct system System;
 
-
-struct position {
-    double x;
-    double y;
-    double z;
-};
-struct velocity {
-    double vx;
-    double vy;
-    double vz;
-};
-struct acceleration {
-    double ax;
-    double ay;
-    double az;
-};
-
-typedef struct position Position;
-typedef struct velocity Velocity;
-typedef struct acceleration Acceleration;
-
+typedef double* Position;
+typedef double* Velocity;
+typedef double* Acceleration;
 
 struct state {
-    Position pos;
-    Velocity vel;
+    double pos[N_DIM];
+    double vel[N_DIM];
 };
 struct change {
-    Velocity vel;
-    Acceleration acc;
+    double vel[N_DIM];
+    double acc[N_DIM];
 };
 
 typedef struct state State;

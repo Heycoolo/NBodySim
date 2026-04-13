@@ -7,13 +7,13 @@
 
 
 #define NUMERICAL_THRESHHOLD_D 1e-12
-//#define GRAVIT 6.6743e-11
+#define N_DIM 3
 #define GRAVIT 6.7e-3
 
 
 // Function declarations
 void zero_change_of_state(System *sys);
-double calculate_distance(Position *pos1, Position *pos2);
+double calculate_distance(Position pos1, Position pos2);
 
 
 
@@ -93,9 +93,7 @@ void evaluate_force_law(Change *k, State *state, System *sys) {
     zero_change_of_state(sys);
 
     double distance;
-    double tmp_ax;
-    double tmp_ay;
-    double tmp_az;
+    double tmp_a;
     
     Body *tmp_body1 = sys->bodies;
     Body *tmp_body2;
@@ -105,9 +103,9 @@ void evaluate_force_law(Change *k, State *state, System *sys) {
     
     for (size_t i = 0; i < sys->n_bodies; i++) {
         // Assign current velocities to the state change
-        tmp_body1->curr_change.vel.vx = state_1->vel.vx;
-        tmp_body1->curr_change.vel.vy = state_1->vel.vy;
-        tmp_body1->curr_change.vel.vz = state_1->vel.vz;
+        for (size_t j = 0; j < N_DIM; j++) {
+            tmp_body1->curr_change.vel[j] = state_1->vel[j];
+        }
 
         for (size_t j = 0; j < sys->n_bodies; j++) {
             if (i == j) {
@@ -115,22 +113,17 @@ void evaluate_force_law(Change *k, State *state, System *sys) {
             }
             state_2 = state + j;
             tmp_body2 = sys->bodies + j;
-            distance = calculate_distance(&state_1->pos, &state_2->pos);
+            distance = calculate_distance(state_1->pos, state_2->pos);
             if (fabs(distance) <= NUMERICAL_THRESHHOLD_D) {
                 continue;
             }
             
-            tmp_ax = GRAVIT * tmp_body2->mass /(pow(distance, 3))
-                    * (state_2->pos.x - state_1->pos.x);
-            tmp_ay = GRAVIT * tmp_body2->mass /(pow(distance, 3))
-                    * (state_2->pos.y - state_1->pos.y);
-            tmp_az = GRAVIT * tmp_body2->mass /(pow(distance, 3))
-                    * (state_2->pos.z - state_1->pos.z);
-            
             // Add to new state of body i
-            tmp_body1->curr_change.acc.ax += tmp_ax;
-            tmp_body1->curr_change.acc.ay += tmp_ay;
-            tmp_body1->curr_change.acc.az += tmp_az;
+            for (size_t j = 0; j < N_DIM; j++) {
+                tmp_a = GRAVIT * tmp_body2->mass / (pow(distance, 3))
+                        * (state_2->pos[j] - state_1->pos[j]);
+                tmp_body1->curr_change.acc[j] += tmp_a;
+            }
         }
 
         void *tmp = memcpy(k + i,
@@ -150,25 +143,24 @@ void evaluate_force_law(Change *k, State *state, System *sys) {
 void zero_change_of_state(System *sys) {
     Body *b = sys->bodies;
     for (size_t i = 0; i < sys->n_bodies; i++) {
-        b->curr_change.vel.vx = 0;
-        b->curr_change.vel.vy = 0;
-        b->curr_change.vel.vz = 0;
-        b->curr_change.acc.ax = 0;
-        b->curr_change.acc.ay = 0;
-        b->curr_change.acc.az = 0;
+        for (size_t j = 0; j < N_DIM; j++) {
+            b->curr_change.vel[j] = 0;
+            b->curr_change.acc[j] = 0;
+        }
         b++;
     }
     return;
 }
 
 
-double calculate_distance(Position *pos1, Position *pos2) {
+double calculate_distance(Position pos1, Position pos2) {
 
-    double dx = pos2->x - pos1->x;
-    double dy = pos2->y - pos1->y;
-    double dz = pos2->z - pos1->z;
+    double r = 0;
+    for (size_t j = 0; j < N_DIM; j++) {
+        r += (pos2[j] - pos1[j]) * (pos2[j] - pos1[j]);
+    }
 
-    double r = sqrt(dx*dx + dy*dy + dz*dz);
+    r = sqrt(r);
     return r;
 }
 
@@ -184,12 +176,12 @@ void print_system_state(System *sys) {
     for (size_t i = 0; i < sys->n_bodies; i++) {
         tmp_state = sys->curr_system_state[i];
         printf("Body %lu:\tpos: (%lf, %lf, %lf)\tvel: (%lf, %lf, %lf)\n", i,
-                                    tmp_state.pos.x,
-                                    tmp_state.pos.y,
-                                    tmp_state.pos.z,
-                                    tmp_state.vel.vx,
-                                    tmp_state.vel.vy,
-                                    tmp_state.vel.vz);
+                                    tmp_state.pos[0],
+                                    tmp_state.pos[1],
+                                    tmp_state.pos[2],
+                                    tmp_state.vel[0],
+                                    tmp_state.vel[1],
+                                    tmp_state.vel[2]);
     }
 
     return;
@@ -204,12 +196,12 @@ void print_body_states(System *sys) {
         b = sys->bodies + i;
         tmp_change = &b->curr_change;
         printf("Body %lu: \tvel: (%lf, %lf, %lf) \tacc: (%lf, %lf, %lf)\n", i,
-                                    tmp_change->vel.vx,
-                                    tmp_change->vel.vy,
-                                    tmp_change->vel.vz,
-                                    tmp_change->acc.ax,
-                                    tmp_change->acc.ay,
-                                    tmp_change->acc.az);
+                                    tmp_change->vel[0],
+                                    tmp_change->vel[1],
+                                    tmp_change->vel[2],
+                                    tmp_change->acc[0],
+                                    tmp_change->acc[1],
+                                    tmp_change->acc[2]);
     }
 
     return;
@@ -226,12 +218,12 @@ void print_state_array(System *sys, size_t sampl) {
             b = sys->bodies + j;
             tmp_state = b->state_arr + i;
             printf("Body %lu:\tpos: (%lf, %lf, %lf)\tvel: (%lf, %lf, %lf)\n", j,
-                                    tmp_state->pos.x,
-                                    tmp_state->pos.y,
-                                    tmp_state->pos.z,
-                                    tmp_state->vel.vx,
-                                    tmp_state->vel.vy,
-                                    tmp_state->vel.vz);    
+                                    tmp_state->pos[0],
+                                    tmp_state->pos[1],
+                                    tmp_state->pos[2],
+                                    tmp_state->vel[0],
+                                    tmp_state->vel[1],
+                                    tmp_state->vel[2]);
         }
     }
 

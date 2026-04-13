@@ -51,8 +51,8 @@ void animate_simulation(System *sys) {
             radius = radius_scale * 
                         pow(3 / (4*PI) * (sys->bodies + i)->mass, 1.0/3.0); 
             state = (sys->bodies + i)->state_arr + j;
-            pos_x = (int) scl * state->pos.x;
-            pos_y = (int) scl * state->pos.y;
+            pos_x = (int) scl * state->pos[0];
+            pos_y = (int) scl * state->pos[1];
             DrawCircle(pos_x, pos_y, radius, (Color){255,255,255,255});
         }
         DrawText(buf, -500, -500, 20, (Color){255,255,255,255});

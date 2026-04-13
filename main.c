@@ -38,7 +38,7 @@ int main() {
     // Time interval
     double t_0 = 0;
     double t_end = 20;
-    double step_size = 5e-7;
+    double step_size = 1e-6;
     size_t n_steps = (t_end - t_0)/step_size;
 
     // Allocate space for body structs
@@ -59,26 +59,21 @@ int main() {
 
 
     // Initialize all bodies
-    Position tmp_pos;
-    Velocity tmp_vel;
+    State tmp_state;
+    double tmp_pos[3];
+    double tmp_vel[3];
     //Body tmp_body;
     for (size_t i = 0; i < n_body; i++) {
-        tmp_pos = (Position){
-            .x = init_x[i],
-            .y = init_y[i],
-            .z = init_z[i]
-        };
-        tmp_vel = (Velocity){
-            .vx = init_vx[i],
-            .vy = init_vy[i],
-            .vz = init_vz[i]
-        };
+        //tmp_pos = {init_x[i], init_y[i], init_z[i]};
+        //tmp_vel = {init_vx[i], init_vy[i], init_vz[i]};
+        tmp_state = (State){.pos = {init_x[i], init_y[i], init_z[i]},
+                .vel = {init_vx[i], init_vy[i], init_vz[i]}};
         bodies[i] = (Body){
             .id = i,
             .mass = masses[i],
             .n_dim = n_dim,
             .n_steps = n_steps,
-            .init_state = (State) {.pos = tmp_pos, .vel = tmp_vel},
+            .init_state = tmp_state,
         };
         initialize_body_state_array(bodies + i);
         store_init_body_state(bodies + i);
